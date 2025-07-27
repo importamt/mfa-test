@@ -1,0 +1,15 @@
+{
+  "name": "mfa-architecture",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter mfa-host dev\" \"pnpm --filter @mfa/shared dev\" \"pnpm --filter @mfa/micro-app-1 dev\" \"pnpm --filter @mfa/micro-app-2 dev\" \"pnpm --filter @mfa/header dev\" \"pnpm --filter @mfa/pip dev\"",
+    "dev:micro2-only": "concurrently \"pnpm --filter mfa-host dev\" \"pnpm --filter @mfa/shared dev\" \"pnpm --filter @mfa/micro-app-2 dev\"",
+    "dev:micro1-header": "concurrently \"pnpm --filter mfa-host dev\" \"pnpm --filter @mfa/shared dev\" \"pnpm --filter @mfa/micro-app-1 dev\" \"pnpm --filter @mfa/header dev\"",
+    "build": "pnpm -r build",
+    "install:all": "pnpm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

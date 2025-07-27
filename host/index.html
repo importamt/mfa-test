@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MFA Host</title>
+    <!-- Import Map은 동적으로 생성됩니다 -->
+    <script id="import-map-script" type="importmap">
+    {
+        "imports": {}
+    }
+    </script>
+</head>
+<body>
+    <!-- Global Provider가 감쌀 루트 컨테이너 -->
+    <div id="app-root">
+        <!-- 영구 UI 컨테이너 (항상 병렬로 로드) -->
+        <div id="persistent-apps">
+            <div id="header-container"></div>
+            <div id="pip-container"></div>
+        </div>
+        
+        <!-- 페이지별 컨텐츠 영역 -->
+        <div id="main-content">
+            <nav>
+                <button data-route="/main">메인 페이지</button>
+                <button data-route="/dashboard">대시보드</button>
+                <button data-route="/profile">프로필</button>
+            </nav>
+            <div id="page-apps-container"></div>
+        </div>
+    </div>
+
+    <!-- SSR에서 내려주는 설정 데이터 -->
+    <script>
+        window.MFA_CONFIG = {
+            // 개발 중인 앱들 (HMR 적용) - micro-app-2만 개발
+            developmentApps: ["@mfa/micro-app-1"],
+            
+            // 공유 라이브러리들 (React, ReactDOM 등)
+            sharedLibraries: {
+                "react": "https://esm.sh/react@18.3.1",
+                "react-dom": "https://esm.sh/react-dom@18.3.1",
+                "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+                "@tanstack/react-query": "https://esm.sh/@tanstack/react-query@5.0.0",
+                "zustand": "https://esm.sh/zustand@4.4.0"
+            },
+            
+            // 프로덕션 빌드된 앱들의 기본 URL
+            productionBaseUrls: {
+                "@mfa/micro-app-1": "http://localhost:3001/dist/micro-app-1-v1.js",
+                "@mfa/micro-app-2": "http://localhost:3002/dist/micro-app-2-v1.js",
+                "@mfa/header-app": "http://localhost:3003/dist/header-v1.js",
+                "@mfa/pip-app": "http://localhost:3004/dist/pip-v1.js", 
+                "@mfa/shared": "http://localhost:3005/dist/shared-v1.js",
+            },
+            
+            // 개발 서버 URL들
+            developmentUrls: {
+                "@mfa/micro-app-1": "http://localhost:3001/src/main.jsx",
+                "@mfa/micro-app-2": "http://localhost:3002/src/main.jsx",
+                "@mfa/header-app": "http://localhost:3003/src/main.jsx",
+                "@mfa/pip-app": "http://localhost:3004/src/main.jsx",
+                "@mfa/shared": "http://localhost:3005/src/main.jsx",
+            },
+            
+            persistentApps: ["@mfa/shared", "@mfa/header-app", "@mfa/pip-app"],
+            routingTable: [
+                {
+                    pathnames: ["/main", "/home"],
+                    apps: ["@mfa/micro-app-1"]
+                },
+                {
+                    pathnames: ["/dashboard"],
+                    apps: ["@mfa/micro-app-1", "@mfa/micro-app-2"]
+                },
+                {
+                    pathnames: ["/profile"],
+                    apps: ["@mfa/micro-app-2"]
+                }
+            ],
+            
+            // SSR에서 내려주는 초기 데이터
+            ssrData: {
+                user: {
+                    id: 1,
+                    name: "김개발자",
+                    email: "dev@example.com",
+                    role: "admin"
+                },
+                theme: "light",
+                language: "ko",
+                queries: {
+                    '["settings"]': {
+                        appName: "MFA Platform",
+                        version: "1.0.0",
+                        features: ["dark-mode", "multi-language", "notifications"]
+                    }
+                }
+            }
+        };
+    </script>
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
