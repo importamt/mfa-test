@@ -8,7 +8,8 @@
     "dev:micro1-header": "concurrently \"pnpm --filter mfa-host dev\" \"pnpm --filter @mfa/shared dev\" \"pnpm --filter @mfa/micro-app-1 dev\" \"pnpm --filter @mfa/header dev\"",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r exec tsc --noEmit",
-    "install:all": "pnpm install"
+    "install:all": "pnpm install",
+    "preview:host": "pnpm --filter mfa-host preview"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

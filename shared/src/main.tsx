@@ -8,6 +8,14 @@ export * from 'react'
 export { createRoot, hydrateRoot } from 'react-dom/client'
 export * as ReactDOM from 'react-dom'
 
+// Zustand 라이브러리 re-export
+export { create as createStore } from 'zustand'
+export * from 'zustand'
+
+// React Query 라이브러리 re-export
+export { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+export * from '@tanstack/react-query'
+
 // 타입들을 re-export
 export * from './types/index.js'
 

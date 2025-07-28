@@ -24,6 +24,9 @@ export default defineConfig(({ command }) => {
       jsxFactory: 'React.createElement',
       jsxFragment: 'React.Fragment'
     },
+    define: {
+      'process.env.NODE_ENV': '"production"'
+    },
     build: {
       lib: {
         entry: 'src/main.tsx',
@@ -32,7 +35,7 @@ export default defineConfig(({ command }) => {
         formats: ['es']
       },
       rollupOptions: {
-        external: ['react', 'react-dom', 'react-dom/client'],
+        external: [],
         output: {
           entryFileNames: 'pip-v1.js',
           globals: {

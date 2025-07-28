@@ -35,24 +35,18 @@
     <script>
         window.MFA_CONFIG = {
             // 개발 중인 앱들 (HMR 적용) - micro-app-2만 개발
-            developmentApps: ["@mfa/micro-app-1"],
+            developmentApps: [],
             
-            // 공유 라이브러리들 - 모든 마이크로 앱이 이 단일 소스에서 가져옴
-            // 중복 다운로드 방지를 위해 Import Map을 통해 전역 제공
-            sharedLibraries: {
-                "react": "https://esm.sh/react@18.3.1",
-                "react-dom": "https://esm.sh/react-dom@18.3.1", 
-                "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-                "@tanstack/react-query": "https://esm.sh/@tanstack/react-query@5.0.0",
-                "zustand": "https://esm.sh/zustand@4.4.0"
-            },
+            // 공유 라이브러리들 - shared 패키지를 통해 제공
+            // 외부 의존성 없이 번들에 포함된 라이브러리 사용
+            sharedLibraries: {},
             
             // 프로덕션 빌드된 앱들의 기본 URL
             productionBaseUrls: {
-                "@mfa/micro-app-1": "http://localhost:3001/dist/micro-app-1-v1.js",
-                "@mfa/micro-app-2": "http://localhost:3002/dist/micro-app-2-v1.js",
-                "@mfa/header-app": "http://localhost:3003/dist/header-v1.js",
-                "@mfa/pip-app": "http://localhost:3004/dist/pip-v1.js"
+                "@mfa/micro-app-1": "/micro-app-1-v1.js",
+                "@mfa/micro-app-2": "/micro-app-2-v1.js",
+                "@mfa/header-app": "/header-v1.js",
+                "@mfa/pip-app": "/pip-v1.js"
             },
             
             // 개발 서버 URL들

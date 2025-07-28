@@ -114,46 +114,82 @@ class MicroFrontendHost {
     }
 
     async loadPageApps(pathname: string): Promise<void> {
-        // 기존 페이지 앱들 언마운트
-        await this.unmountCurrentPageApps()
-
         // 현재 경로에 맞는 앱들 찾기
         const routeConfig = this.config.routingTable.find(route => 
             route.pathnames.includes(pathname)
         )
 
         if (!routeConfig) {
+            await this.unmountCurrentPageApps()
             this.showDefaultPage()
             return
         }
 
+        const newAppNames = routeConfig.apps
+        const currentAppNames = this.currentPageApps.map(app => app.appName)
+
+        // 동일한 앱 목록인지 확인
+        const isSameApps = newAppNames.length === currentAppNames.length && 
+                          newAppNames.every(appName => currentAppNames.includes(appName)) &&
+                          currentAppNames.every(appName => newAppNames.includes(appName))
+
+        if (isSameApps) {
+            console.log('동일한 앱들이 이미 마운트되어 있음. 리마운트 생략.')
+            return
+        }
+
+        // 제거할 앱들 언마운트
+        const appsToRemove = this.currentPageApps.filter(
+            currentApp => !newAppNames.includes(currentApp.appName)
+        )
+        
+        for (const { module, container } of appsToRemove) {
+            if (module.unmount) {
+                await module.unmount()
+            }
+            container.remove()
+        }
+
+        // 유지할 앱들
+        const appsToKeep = this.currentPageApps.filter(
+            currentApp => newAppNames.includes(currentApp.appName)
+        )
+
+        // 새로 추가할 앱들
+        const appsToAdd = newAppNames.filter(
+            appName => !currentAppNames.includes(appName)
+        )
+
         try {
             const container = document.getElementById('page-apps-container')
             if (!container) return
-            
-            container.innerHTML = ''
 
-            // 페이지 앱들을 병렬로 로드
-            const loadPromises = routeConfig.apps.map(async (appName, index) => {
-                const moduleUrl = this.dynamicImportMap[appName]
-                const module = await import(moduleUrl)
-                return { appName, module, index }
-            })
+            // 새로운 앱들을 병렬로 로드
+            if (appsToAdd.length > 0) {
+                const loadPromises = appsToAdd.map(async (appName) => {
+                    const moduleUrl = this.dynamicImportMap[appName]
+                    const module = await import(moduleUrl)
+                    return { appName, module }
+                })
 
-            const results = await Promise.all(loadPromises)
-            
-            results.forEach(({ appName, module, index }) => {
-                const appContainer = document.createElement('div')
-                appContainer.id = `page-app-${index}`
-                appContainer.className = 'page-app-container'
-                container.appendChild(appContainer)
+                const results = await Promise.all(loadPromises)
+                
+                results.forEach(({ appName, module }) => {
+                    const appContainer = document.createElement('div')
+                    appContainer.id = `page-app-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+                    appContainer.className = 'page-app-container'
+                    container.appendChild(appContainer)
 
-                if (module.mount) {
-                    module.mount(appContainer)
-                    this.currentPageApps.push({ appName, module, container: appContainer })
-                    console.log(`페이지 앱 로드 완료: ${appName}`)
-                }
-            })
+                    if (module.mount) {
+                        module.mount(appContainer)
+                        appsToKeep.push({ appName, module, container: appContainer })
+                        console.log(`새 페이지 앱 로드 완료: ${appName}`)
+                    }
+                })
+            }
+
+            // 현재 앱 목록 업데이트
+            this.currentPageApps = appsToKeep
 
         } catch (error) {
             console.error('페이지 앱 로드 실패:', error)
