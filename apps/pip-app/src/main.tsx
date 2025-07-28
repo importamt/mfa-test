@@ -1,13 +1,17 @@
-import React from 'react'
-import { createRoot } from 'react-dom/client'
+import { React, createRoot, type Root } from '@mfa/shared'
 
-function PipApp() {
-    const [isVisible, setIsVisible] = React.useState(false)
-    const [position, setPosition] = React.useState({ x: 20, y: 20 })
-    const [isDragging, setIsDragging] = React.useState(false)
-    const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 })
+interface Position {
+    x: number
+    y: number
+}
 
-    const handleMouseDown = (e) => {
+function PipApp(): JSX.Element {
+    const [isVisible, setIsVisible] = React.useState<boolean>(false)
+    const [position, setPosition] = React.useState<Position>({ x: 20, y: 20 })
+    const [isDragging, setIsDragging] = React.useState<boolean>(false)
+    const [dragStart, setDragStart] = React.useState<Position>({ x: 0, y: 0 })
+
+    const handleMouseDown = (e: React.MouseEvent): void => {
         setIsDragging(true)
         setDragStart({
             x: e.clientX - position.x,
@@ -15,7 +19,7 @@ function PipApp() {
         })
     }
 
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: MouseEvent): void => {
         if (isDragging) {
             setPosition({
                 x: e.clientX - dragStart.x,
@@ -24,7 +28,7 @@ function PipApp() {
         }
     }
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (): void => {
         setIsDragging(false)
     }
 
@@ -169,9 +173,9 @@ function PipApp() {
     )
 }
 
-let root = null
+let root: Root | null = null
 
-export function mount(container) {
+export function mount(container: HTMLElement): void {
     if (root) return
     
     root = createRoot(container)
@@ -179,7 +183,7 @@ export function mount(container) {
     console.log('PIP App (React) 마운트 완료')
 }
 
-export function unmount() {
+export function unmount(): void {
     if (root) {
         root.unmount()
         root = null

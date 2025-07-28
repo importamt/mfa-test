@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // 글로벌 QueryClient 인스턴스
-let globalQueryClient = null
+let globalQueryClient: QueryClient | null = null
 
-export function getQueryClient() {
+export function getQueryClient(): QueryClient {
   if (!globalQueryClient) {
     globalQueryClient = new QueryClient({
       defaultOptions: {
@@ -24,19 +24,28 @@ export function getQueryClient() {
 }
 
 // SSR에서 prefetch된 데이터로 QueryClient 초기화
-export function initializeQueryClient(ssrQueries = {}) {
+export function initializeQueryClient(ssrQueries: Record<string, any> = {}): QueryClient {
   const queryClient = getQueryClient()
   
   // SSR에서 가져온 쿼리 데이터들을 QueryClient에 설정
   Object.entries(ssrQueries).forEach(([queryKey, data]) => {
-    queryClient.setQueryData(JSON.parse(queryKey), data)
+    try {
+      queryClient.setQueryData(JSON.parse(queryKey), data)
+    } catch (error) {
+      console.warn('Failed to parse query key:', queryKey, error)
+    }
   })
   
   return queryClient
 }
 
+interface MfaQueryProviderProps {
+  children: ReactNode
+  ssrQueries?: Record<string, any>
+}
+
 // Provider 컴포넌트
-export function MfaQueryProvider({ children, ssrQueries }) {
+export function MfaQueryProvider({ children, ssrQueries }: MfaQueryProviderProps): JSX.Element {
   const queryClient = React.useMemo(() => {
     return initializeQueryClient(ssrQueries)
   }, [ssrQueries])

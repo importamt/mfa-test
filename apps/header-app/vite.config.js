@@ -16,7 +16,7 @@ export default defineConfig(({ command }) => {
     },
     resolve: {
       alias: isDev ? {
-        '@mfa/shared': path.resolve(__dirname, '../../shared/src/main.jsx')
+        '@mfa/shared': path.resolve(__dirname, '../../shared/src/main.tsx')
       } : {}
     },
     esbuild: {
@@ -26,20 +26,19 @@ export default defineConfig(({ command }) => {
     },
     build: {
       lib: {
-        entry: 'src/main.jsx',
+        entry: 'src/main.tsx',
         name: 'HeaderApp',
         fileName: 'header-v1',
         formats: ['es']
       },
       rollupOptions: {
-        external: ['react', 'react-dom', 'react-dom/client', '@mfa/shared'],
+        external: ['react', 'react-dom', 'react-dom/client'],
         output: {
           entryFileNames: 'header-v1.js',
           globals: {
             'react': 'React',
             'react-dom': 'ReactDOM',
             'react-dom/client': 'ReactDOMClient',
-            '@mfa/shared': 'MfaShared'
           }
         }
       }

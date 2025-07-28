@@ -1,16 +1,17 @@
-import { useQuery as useTanstackQuery, useMutation as useTanstackMutation } from '@tanstack/react-query'
+import { useQuery as useTanstackQuery, useMutation as useTanstackMutation, useQueryClient } from '@tanstack/react-query'
+import type { User, Settings } from '../types/index.js'
 
 // 공용 API 호출 함수들
 export const api = {
   // 사용자 정보 조회
-  getUser: async (userId) => {
+  getUser: async (userId: number): Promise<User> => {
     const response = await fetch(`/api/users/${userId}`)
     if (!response.ok) throw new Error('Failed to fetch user')
     return response.json()
   },
 
   // 사용자 목록 조회
-  getUsers: async (params = {}) => {
+  getUsers: async (params: Record<string, any> = {}): Promise<User[]> => {
     const searchParams = new URLSearchParams(params)
     const response = await fetch(`/api/users?${searchParams}`)
     if (!response.ok) throw new Error('Failed to fetch users')
@@ -18,7 +19,7 @@ export const api = {
   },
 
   // 사용자 업데이트
-  updateUser: async ({ userId, data }) => {
+  updateUser: async ({ userId, data }: { userId: number, data: Partial<User> }): Promise<User> => {
     const response = await fetch(`/api/users/${userId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -29,7 +30,7 @@ export const api = {
   },
 
   // 공용 설정 조회
-  getSettings: async () => {
+  getSettings: async (): Promise<Settings> => {
     const response = await fetch('/api/settings')
     if (!response.ok) throw new Error('Failed to fetch settings')
     return response.json()
@@ -37,7 +38,7 @@ export const api = {
 }
 
 // 공용 쿼리 훅들
-export function useUser(userId) {
+export function useUser(userId: number) {
   return useTanstackQuery({
     queryKey: ['user', userId],
     queryFn: () => api.getUser(userId),
@@ -45,7 +46,7 @@ export function useUser(userId) {
   })
 }
 
-export function useUsers(params) {
+export function useUsers(params?: Record<string, any>) {
   return useTanstackQuery({
     queryKey: ['users', params],
     queryFn: () => api.getUsers(params)
@@ -62,6 +63,8 @@ export function useSettings() {
 
 // 공용 뮤테이션 훅들
 export function useUpdateUser() {
+  const queryClient = useQueryClient()
+  
   return useTanstackMutation({
     mutationFn: api.updateUser,
     onSuccess: () => {

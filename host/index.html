@@ -37,10 +37,11 @@
             // 개발 중인 앱들 (HMR 적용) - micro-app-2만 개발
             developmentApps: ["@mfa/micro-app-1"],
             
-            // 공유 라이브러리들 (React, ReactDOM 등)
+            // 공유 라이브러리들 - 모든 마이크로 앱이 이 단일 소스에서 가져옴
+            // 중복 다운로드 방지를 위해 Import Map을 통해 전역 제공
             sharedLibraries: {
                 "react": "https://esm.sh/react@18.3.1",
-                "react-dom": "https://esm.sh/react-dom@18.3.1",
+                "react-dom": "https://esm.sh/react-dom@18.3.1", 
                 "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
                 "@tanstack/react-query": "https://esm.sh/@tanstack/react-query@5.0.0",
                 "zustand": "https://esm.sh/zustand@4.4.0"
@@ -51,20 +52,18 @@
                 "@mfa/micro-app-1": "http://localhost:3001/dist/micro-app-1-v1.js",
                 "@mfa/micro-app-2": "http://localhost:3002/dist/micro-app-2-v1.js",
                 "@mfa/header-app": "http://localhost:3003/dist/header-v1.js",
-                "@mfa/pip-app": "http://localhost:3004/dist/pip-v1.js", 
-                "@mfa/shared": "http://localhost:3005/dist/shared-v1.js",
+                "@mfa/pip-app": "http://localhost:3004/dist/pip-v1.js"
             },
             
             // 개발 서버 URL들
             developmentUrls: {
-                "@mfa/micro-app-1": "http://localhost:3001/src/main.jsx",
-                "@mfa/micro-app-2": "http://localhost:3002/src/main.jsx",
-                "@mfa/header-app": "http://localhost:3003/src/main.jsx",
-                "@mfa/pip-app": "http://localhost:3004/src/main.jsx",
-                "@mfa/shared": "http://localhost:3005/src/main.jsx",
+                "@mfa/micro-app-1": "http://localhost:3001/src/main.tsx",
+                "@mfa/micro-app-2": "http://localhost:3002/src/main.tsx",
+                "@mfa/header-app": "http://localhost:3003/src/main.tsx",
+                "@mfa/pip-app": "http://localhost:3004/src/main.tsx"
             },
             
-            persistentApps: ["@mfa/shared", "@mfa/header-app", "@mfa/pip-app"],
+            persistentApps: ["@mfa/header-app", "@mfa/pip-app"],
             routingTable: [
                 {
                     pathnames: ["/main", "/home"],
@@ -100,6 +99,6 @@
             }
         };
     </script>
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

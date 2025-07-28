@@ -15,9 +15,9 @@ export default defineConfig(({ command }) => {
       }
     },
     resolve: {
-      alias: isDev ? {
-        '@mfa/shared': path.resolve(__dirname, '../../shared/src/main.jsx')
-      } : {}
+      alias: {
+        '@mfa/shared': path.resolve(__dirname, '../../shared/src/main.tsx')
+      }
     },
     esbuild: {
       jsx: 'transform',
@@ -26,20 +26,19 @@ export default defineConfig(({ command }) => {
     },
     build: {
       lib: {
-        entry: 'src/main.jsx',
+        entry: 'src/main.tsx',
         name: 'MicroApp2',
         fileName: 'micro-app-2-v1',
         formats: ['es']
       },
       rollupOptions: {
-        external: ['react', 'react-dom', 'react-dom/client', '@mfa/shared'],
+        external: ['react', 'react-dom', 'react-dom/client'],
         output: {
           entryFileNames: 'micro-app-2-v1.js',
           globals: {
             'react': 'React',
             'react-dom': 'ReactDOM',
-            'react-dom/client': 'ReactDOMClient',
-            '@mfa/shared': 'MfaShared'
+            'react-dom/client': 'ReactDOMClient'
           }
         }
       }

@@ -1,9 +1,8 @@
-import React from 'react'
-import { createRoot } from 'react-dom/client'
+import { React, createRoot, type Root } from '@mfa/shared'
 
-function HeaderApp() {
-    const [user, setUser] = React.useState('Admin')
-    const [isMenuOpen, setIsMenuOpen] = React.useState(false)
+function HeaderApp(): JSX.Element {
+    const [user, setUser] = React.useState<string>('Admin')
+    const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false)
 
     return (
         <header style={{
@@ -108,9 +107,9 @@ function HeaderApp() {
     )
 }
 
-let root = null
+let root: Root | null = null
 
-export function mount(container) {
+export function mount(container: HTMLElement): void {
     if (root) return
     
     root = createRoot(container)
@@ -118,7 +117,7 @@ export function mount(container) {
     console.log('Header App (React) 마운트 완료')
 }
 
-export function unmount() {
+export function unmount(): void {
     if (root) {
         root.unmount()
         root = null

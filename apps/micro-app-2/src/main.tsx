@@ -1,11 +1,16 @@
-import React from 'react'
-import { createRoot } from 'react-dom/client'
+import { React, createRoot, type Root } from '@mfa/shared'
 
-function MicroApp2() {
-    const [todos, setTodos] = React.useState([])
-    const [inputValue, setInputValue] = React.useState('')
+interface Todo {
+    id: number
+    text: string
+    completed: boolean
+}
 
-    const addTodo = () => {
+function MicroApp2(): JSX.Element {
+    const [todos, setTodos] = React.useState<Todo[]>([])
+    const [inputValue, setInputValue] = React.useState<string>('')
+
+    const addTodo = (): void => {
         if (inputValue.trim()) {
             setTodos(prev => [...prev, {
                 id: Date.now(),
@@ -16,13 +21,13 @@ function MicroApp2() {
         }
     }
 
-    const toggleTodo = (id) => {
+    const toggleTodo = (id: number): void => {
         setTodos(prev => prev.map(todo => 
             todo.id === id ? { ...todo, completed: !todo.completed } : todo
         ))
     }
 
-    const deleteTodo = (id) => {
+    const deleteTodo = (id: number): void => {
         setTodos(prev => prev.filter(todo => todo.id !== id))
     }
 
@@ -115,9 +120,9 @@ function MicroApp2() {
     )
 }
 
-let root = null
+let root: Root | null = null
 
-export function mount(container) {
+export function mount(container: HTMLElement): void {
     if (root) return
     
     root = createRoot(container)
@@ -125,10 +130,10 @@ export function mount(container) {
     console.log('Micro App 2 (React Todo) 마운트 완료')
 }
 
-export function unmount() {
+export function unmount(): void {
     if (root) {
         root.unmount()
         root = null
-        console.log('Micro App 2 (React Todo) 언마운트 완료')
+        console.log('Micro App 2 (React Todo) 언마운트 완룬')
     }
 }

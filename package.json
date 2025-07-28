@@ -7,9 +7,12 @@
     "dev:micro2-only": "concurrently \"pnpm --filter mfa-host dev\" \"pnpm --filter @mfa/shared dev\" \"pnpm --filter @mfa/micro-app-2 dev\"",
     "dev:micro1-header": "concurrently \"pnpm --filter mfa-host dev\" \"pnpm --filter @mfa/shared dev\" \"pnpm --filter @mfa/micro-app-1 dev\" \"pnpm --filter @mfa/header dev\"",
     "build": "pnpm -r build",
+    "typecheck": "pnpm -r exec tsc --noEmit",
     "install:all": "pnpm install"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
   }
 }

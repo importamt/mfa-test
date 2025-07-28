@@ -17,7 +17,7 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: 'src/main.jsx',
+      entry: 'src/main.tsx',
       name: 'MfaShared',
       fileName: 'shared-v1',
       formats: ['es']

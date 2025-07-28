@@ -1,20 +1,18 @@
-import React from 'react'
-import { createRoot } from 'react-dom/client'
-import { useUserStore, useNotificationStore } from '@mfa/shared'
+import { React, createRoot, useUserStore, useNotificationStore, type Root } from '@mfa/shared'
 
 // React 컴포넌트
-function MicroApp1() {
-    const [clickCount, setClickCount] = React.useState(0)
-    const [currentTime, setCurrentTime] = React.useState('')
+function MicroApp1(): JSX.Element {
+    const [clickCount, setClickCount] = React.useState<number>(0)
+    const [currentTime, setCurrentTime] = React.useState<string>('')
     
     // Zustand stores 직접 사용
     const { user, theme, setTheme } = useUserStore()
     const { addNotification } = useNotificationStore()
     
     // SSR 데이터에서 settings 가져오기
-    const settings = window.MFA_CONFIG?.ssrData?.queries?.['["settings"]'] || null;
+    const settings = window.MFA_CONFIG?.ssrData?.queries?.['["settings"]'] || null
 
-    const handleClick = () => {
+    const handleClick = (): void => {
         setClickCount(prev => prev + 1)
         setCurrentTime(new Date().toLocaleTimeString())
         
@@ -27,7 +25,7 @@ function MicroApp1() {
         })
     }
 
-    const toggleTheme = () => {
+    const toggleTheme = (): void => {
         setTheme(theme === 'light' ? 'dark' : 'light')
         addNotification({
             type: 'info',
@@ -102,9 +100,9 @@ function MicroApp1() {
 }
 
 // 마운트/언마운트 함수들
-let root = null
+let root: Root | null = null
 
-export function mount(container) {
+export function mount(container: HTMLElement): void {
     if (root) return
     
     root = createRoot(container)
@@ -112,7 +110,7 @@ export function mount(container) {
     console.log('Micro App 1 (React) 마운트 완료')
 }
 
-export function unmount() {
+export function unmount(): void {
     if (root) {
         root.unmount()
         root = null
