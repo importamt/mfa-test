@@ -1,14 +1,69 @@
-// 엔터프라이즈급 MFA 타입 정의
+// MFA 타입 정의
+
+// Import Map 타입
+export type ImportMap = Record<string, string>
+
+// 라우팅 테이블 엔트리
+export interface RoutingTableEntry {
+  pathnames: string[]
+  apps: string[]
+  meta: RouteMeta
+  preload?: boolean
+  cache?: boolean
+}
+
+// 라우팅 테이블 타입
+export type RoutingTable = RoutingTableEntry[]
+
+// 배포 관리 시스템에서 받아올 전체 설정
+export interface MFADeploymentConfig {
+  version: string
+  environment: 'development' | 'production'
+  lastUpdated: string
+  importMap: ImportMap
+  routingTable: RoutingTable
+  persistentApps: string[]
+  teams?: Record<string, TeamInfo>
+  features?: {
+    preloadCriticalApps?: boolean
+    enablePerfMonitoring?: boolean
+    enableErrorTracking?: boolean
+    hybridMode?: boolean
+  }
+}
+
+// 팀 정보 (나중에 필요시 사용)
+export interface TeamInfo {
+  id: string
+  name: string
+  apps: string[]
+}
+
+// 팀 매니페스트 (나중에 필요시 사용)
+export interface TeamManifest {
+  teamId: string
+  teamName: string
+  apps: Array<{
+    id: string
+    url: string
+    version: string
+    lastUpdated: string
+  }>
+  metadata: {
+    lastDeployed: string
+    deployedBy: string
+  }
+}
+
+// 브라우저에서 사용할 MFA 설정
 export interface MFAConfig {
   ssrData: SSRData
-  importMap: Record<string, string>
-  routingTable: RouteConfig[]
-  developmentApps: string[]
-  sharedLibraries: Record<string, string>
+  importMap: ImportMap
+  routingTable: RoutingTable
+  persistentApps: string[]
   currentRoute: string
   version: string
   environment: 'development' | 'production'
-  cdnBaseUrl?: string
 }
 
 export interface SSRData {

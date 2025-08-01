@@ -1,65 +1,29 @@
 "use client";
 
-import { MFA_APPS, PERSISTENT_APPS, ROUTE_APPS } from "@/config/mfa-apps";
-import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import MFADynamicLoader from "./MFADynamicLoader";
+import { useEffect, useRef } from "react";
+import { initializeMFASystem, HybridMFASystem } from "@/lib/mfa-system";
 
 export default function MFAContainer() {
-  const pathname = usePathname();
-  const [moduleUrls, setModuleUrls] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(true);
-
-  // 현재 경로에서 로드할 앱들
-  const currentApps = useMemo(() => ROUTE_APPS[pathname] || [], [pathname]);
+  const mfaSystemRef = useRef<HybridMFASystem | null>(null);
+  const isInitialized = useRef(false);
 
   useEffect(() => {
-    // 서버 사이드에서는 실행하지 않음
-    if (typeof window === "undefined") return;
+    // 서버에서 이미 설정된 MFA_CONFIG 사용
+    if (typeof window === "undefined" || !window.MFA_CONFIG) return;
 
-    // API에서 URL 정보 가져오기
-    fetch("/api/mfa-config")
-      .then((res) => res.json())
-      .then((data) => {
-        setModuleUrls(data.apps);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error("Failed to fetch MFA config:", error);
-        setIsLoading(false);
+    // 한 번만 초기화
+    if (!isInitialized.current) {
+      console.log("🚀 MFA Container 초기화", {
+        importMap: window.MFA_CONFIG.importMap,
+        persistentApps: window.MFA_CONFIG.persistentApps,
+        routingTable: window.MFA_CONFIG.routingTable
       });
+      
+      mfaSystemRef.current = initializeMFASystem();
+      isInitialized.current = true;
+    }
   }, []);
 
-  if (isLoading) {
-    return <div className="text-center py-8">Loading MFA configuration...</div>;
-  }
-
-  return (
-    <>
-      {/* 영구 앱들 (헤더 등) */}
-      {PERSISTENT_APPS.map((appId: string) =>
-        moduleUrls[appId] ? (
-          <MFADynamicLoader
-            key={appId}
-            appId={appId}
-            moduleUrl={moduleUrls[appId]}
-            containerId={`${MFA_APPS[appId].name}-container`}
-          />
-        ) : null
-      )}
-
-      {/* 페이지별 앱들 */}
-      <div id="page-apps" className="container mx-auto px-4 py-8">
-        {currentApps.map((appId: string) =>
-          moduleUrls[appId] ? (
-            <MFADynamicLoader
-              key={appId}
-              appId={appId}
-              moduleUrl={moduleUrls[appId]}
-            />
-          ) : null
-        )}
-      </div>
-    </>
-  );
+  // mfa-system이 모든 것을 동적으로 처리
+  return <div id="mfa-root" />;
 }

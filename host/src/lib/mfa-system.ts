@@ -46,15 +46,20 @@ export class HybridMFASystem {
   }
 
   setupImportMap(): void {
-    const existingScript = document.getElementById('import-map-script')
-    if (existingScript) existingScript.remove()
+    // 서버에서 이미 렌더링된 import map이 있는지 확인
+    const existingImportMap = document.querySelector('script[type="importmap"]')
+    if (existingImportMap) {
+      console.log('📦 서버 렌더링된 Import Map 사용:', existingImportMap.textContent)
+      return
+    }
 
+    // 없으면 동적으로 생성 (fallback)
     const importMapScript = document.createElement('script')
     importMapScript.type = 'importmap'
     importMapScript.id = 'import-map-script'
     importMapScript.textContent = JSON.stringify({
       imports: this.config.importMap
-    })
+    }, null, 2)
     
     document.head.appendChild(importMapScript)
     console.log('📦 Import Map 동적 설정 완료', this.config.importMap)
@@ -93,7 +98,7 @@ export class HybridMFASystem {
     const moduleUrl = this.config.importMap[appName]
     if (!moduleUrl) return
     
-    const loadPromise = import(moduleUrl).then(module => {
+    const loadPromise = import(/* webpackIgnore: true */ moduleUrl).then(module => {
       performance.mark(`preload-${appName}-complete`)
       return module
     })
@@ -224,10 +229,21 @@ export class HybridMFASystem {
 
       // 새 앱들 로드
       if (appsToAdd.length > 0) {
-        const container = document.getElementById('page-apps-container')
-        if (!container) return
+        const rootContainer = document.getElementById('mfa-root')
+        if (!rootContainer) {
+          console.error('❌ MFA root container를 찾을 수 없습니다')
+          return
+        }
 
-        const loadedApps = await this.loadAppsParallel(appsToAdd, container)
+        // 페이지 앱들을 위한 컨테이너 확인/생성
+        let pageContainer = document.getElementById('mfa-page-apps')
+        if (!pageContainer) {
+          pageContainer = document.createElement('div')
+          pageContainer.id = 'mfa-page-apps'
+          rootContainer.appendChild(pageContainer)
+        }
+
+        const loadedApps = await this.loadAppsParallel(appsToAdd, pageContainer)
         appsToKeep.push(...loadedApps)
       }
 
@@ -259,8 +275,10 @@ export class HybridMFASystem {
         if (this.preloadCache.has(appName)) {
           module = await this.preloadCache.get(appName)!
         } else {
+          // 직접 URL로 로딩 (import map은 초기 로드에서만 작동)
           const moduleUrl = this.config.importMap[appName]
-          module = await import(moduleUrl)
+          console.log(`🔗 ${appName} 로딩:`, moduleUrl)
+          module = await import(/* webpackIgnore: true */ moduleUrl)
         }
 
         // 컨테이너 생성
@@ -279,7 +297,8 @@ export class HybridMFASystem {
         }
 
         const loadTime = performance.now() - startTime
-        performance.measure(`load-${appName}`, { duration: loadTime })
+        // performance.measure는 mark가 필요하므로 주석 처리
+        // performance.measure(`load-${appName}`, { duration: loadTime })
 
         console.log(`✅ 앱 로드 완료: ${appName} (${loadTime.toFixed(2)}ms)`)
 
@@ -318,23 +337,47 @@ export class HybridMFASystem {
   async loadPersistentApps(): Promise<void> {
     if (this.persistentAppsLoaded) return
 
-    const persistentApps = ['@mfa/header-app', '@mfa/pip-app']
+    const persistentApps = this.config.persistentApps || []
     
+    if (persistentApps.length === 0) {
+      console.log('🔧 영구 로드할 앱이 없습니다')
+      return
+    }
+
+    const rootContainer = document.getElementById('mfa-root')
+    if (!rootContainer) {
+      console.error('❌ MFA root container를 찾을 수 없습니다')
+      return
+    }
+
     try {
       const loadPromises = persistentApps.map(async (appName) => {
         const moduleUrl = this.config.importMap[appName]
-        if (!moduleUrl) return null
+        if (!moduleUrl) {
+          console.warn(`⚠️  Import map에 ${appName}이 없습니다`)
+          return null
+        }
 
-        const module = await import(moduleUrl)
-        const containerId = this.getContainerIdForApp(appName)
-        const container = document.getElementById(containerId)
+        // 직접 URL로 로딩 (import map은 초기 로드에서만 작동)
+        console.log(`🔗 ${appName} 로딩:`, moduleUrl)
+        const module = await import(/* webpackIgnore: true */ moduleUrl)
+        
+        // 동적으로 컨테이너 생성
+        const container = document.createElement('div')
+        container.id = `mfa-persistent-${appName.replace('@mfa/', '')}`
+        container.dataset.appName = appName
+        
+        rootContainer.appendChild(container)
 
-        if (container && module.mount) {
-          await module.mount(container)
+        if (module.mount) {
+          await module.mount(container, {
+            ssrData: this.config.ssrData,
+            environment: this.config.environment
+          })
           console.log(`🔧 영구 앱 로드: ${appName}`)
         }
 
-        return { appName, module }
+        return { appName, module, container }
       })
 
       await Promise.all(loadPromises)
@@ -351,14 +394,21 @@ export class HybridMFASystem {
   }
 
   showDefaultPage(): void {
-    const container = document.getElementById('page-apps-container')
-    if (!container) return
+    const rootContainer = document.getElementById('mfa-root')
+    if (!rootContainer) return
 
-    container.innerHTML = `
-      <div class="flex flex-col items-center justify-center min-h-96 p-8">
-        <h2 class="text-2xl font-bold mb-4">🚀 Enterprise MFA Platform</h2>
-        <p class="text-gray-600 mb-4">Next.js + Micro Frontend Architecture</p>
-        <p class="text-sm text-gray-500">현재 경로: ${window.location.pathname}</p>
+    let pageContainer = document.getElementById('mfa-page-apps')
+    if (!pageContainer) {
+      pageContainer = document.createElement('div')
+      pageContainer.id = 'mfa-page-apps'
+      rootContainer.appendChild(pageContainer)
+    }
+
+    pageContainer.innerHTML = `
+      <div>
+        <h2>Enterprise MFA Platform</h2>
+        <p>Next.js + Micro Frontend Architecture</p>
+        <p>현재 경로: ${window.location.pathname}</p>
       </div>
     `
   }
@@ -366,30 +416,24 @@ export class HybridMFASystem {
   handleLoadError(pathname: string, error: Error): void {
     this.metrics.errorCounts[pathname] = (this.metrics.errorCounts[pathname] || 0) + 1
     
-    const container = document.getElementById('page-apps-container')
-    if (!container) return
+    const rootContainer = document.getElementById('mfa-root')
+    if (!rootContainer) return
 
-    container.innerHTML = `
-      <div class="flex flex-col items-center justify-center min-h-96 p-8 text-center">
-        <h2 class="text-xl font-bold text-red-600 mb-4">❌ 앱 로드 실패</h2>
-        <p class="text-gray-600 mb-4">마이크로 앱을 불러오는 중 오류가 발생했습니다.</p>
-        <pre class="text-sm text-gray-500 bg-gray-100 p-4 rounded">${error.message}</pre>
-        <button 
-          onclick="window.location.reload()" 
-          class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          다시 시도
-        </button>
+    let pageContainer = document.getElementById('mfa-page-apps')
+    if (!pageContainer) {
+      pageContainer = document.createElement('div')
+      pageContainer.id = 'mfa-page-apps'
+      rootContainer.appendChild(pageContainer)
+    }
+
+    pageContainer.innerHTML = `
+      <div>
+        <h2>앱 로드 실패</h2>
+        <p>마이크로 앱을 불러오는 중 오류가 발생했습니다.</p>
+        <pre>${error.message}</pre>
+        <button onclick="window.location.reload()">다시 시도</button>
       </div>
     `
-  }
-
-  getContainerIdForApp(appName: string): string {
-    const containerMap: Record<string, string> = {
-      '@mfa/header-app': 'header-container',
-      '@mfa/pip-app': 'pip-container'
-    }
-    return containerMap[appName] || 'unknown-container'
   }
 
   arraysEqual<T>(a: T[], b: T[]): boolean {
