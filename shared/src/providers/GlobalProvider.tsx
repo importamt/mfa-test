@@ -33,7 +33,7 @@ function NotificationCenter(): JSX.Element | null {
             maxWidth: '400px',
             cursor: 'pointer'
           }}
-          onClick={() => removeNotification(notification.id)}
+          onClick={() => notification.id && removeNotification(notification.id)}
         >
           <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
             {notification.title}
@@ -74,11 +74,5 @@ export function MfaGlobalProvider({ children, ssrData = {} }: MfaGlobalProviderP
 }
 
 // 커스텀 훅들 - 마이크로 앱에서 사용
-export function useGlobalUser() {
-  const userStore = useUserStore()
-  return userStore
-}
-
-export function useGlobalNotification() {
-  return useNotificationStore()
-}
+export const useGlobalUser = useUserStore
+export const useGlobalNotification = useNotificationStore

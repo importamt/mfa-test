@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"pnpm --filter mfa-host dev\" \"pnpm --filter @mfa/shared dev\" \"pnpm --filter @mfa/micro-app-1 dev\" \"pnpm --filter @mfa/micro-app-2 dev\" \"pnpm --filter @mfa/header dev\" \"pnpm --filter @mfa/pip dev\"",
+    "dev": "tsx scripts/dev-manager.ts",
+    "dev:all": "concurrently \"pnpm --filter mfa-host dev\" \"pnpm --filter @mfa/shared dev\" \"pnpm --filter @mfa/micro-app-1 dev\" \"pnpm --filter @mfa/micro-app-2 dev\" \"pnpm --filter @mfa/header dev\" \"pnpm --filter @mfa/pip dev\"",
     "dev:micro2-only": "concurrently \"pnpm --filter mfa-host dev\" \"pnpm --filter @mfa/shared dev\" \"pnpm --filter @mfa/micro-app-2 dev\"",
     "dev:micro1-header": "concurrently \"pnpm --filter mfa-host dev\" \"pnpm --filter @mfa/shared dev\" \"pnpm --filter @mfa/micro-app-1 dev\" \"pnpm --filter @mfa/header dev\"",
     "build": "pnpm -r build",
@@ -12,8 +13,11 @@
     "preview:host": "pnpm --filter mfa-host preview"
   },
   "devDependencies": {
+    "@types/inquirer": "^9.0.8",
+    "@types/node": "^20.0.0",
     "concurrently": "^8.2.2",
-    "typescript": "^5.0.0",
-    "@types/node": "^20.0.0"
+    "inquirer": "^12.9.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.0.0"
   }
 }

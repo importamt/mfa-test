@@ -24,7 +24,10 @@
     "baseUrl": ".",
     "paths": {
       "@mfa/shared": ["./shared/src/main.tsx"],
-      "@mfa/shared/*": ["./shared/src/*"]
+      "@mfa/shared/*": ["./shared/src/*"],
+      "@/*": ["./src/*"],
+      "@/config/*": ["./src/config/*"],
+      "@/types/*": ["./src/types/*"]
     }
   },
   "include": [],

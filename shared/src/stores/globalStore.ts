@@ -57,14 +57,7 @@ export const useEventStore = create<EventState>((set, get) => ({
     }))
     
     // cleanup function 반환
-    return () => {
-      set(state => ({
-        events: {
-          ...state.events,
-          [eventName]: (state.events[eventName] || []).filter(h => h !== handler)
-        }
-      }))
-    }
+    return () => get().off(eventName, handler)
   },
   
   off: (eventName, handler) => {
@@ -78,9 +71,9 @@ export const useEventStore = create<EventState>((set, get) => ({
 }))
 
 interface NotificationState {
-  notifications: (Notification & { id: number })[]  
-  addNotification: (notification: Omit<Notification, 'id' | 'timestamp'> & { autoRemove?: boolean, duration?: number }) => number
-  removeNotification: (id: number) => void
+  notifications: Notification[]  
+  addNotification: (notification: Omit<Notification, 'id' | 'timestamp'> & { autoRemove?: boolean }) => string
+  removeNotification: (id: string) => void
   clearNotifications: () => void
 }
 
@@ -89,8 +82,13 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   notifications: [],
   
   addNotification: (notification) => {
-    const id = Date.now()
-    const newNotification = { id, ...notification }
+    const id = Date.now().toString()
+    const timestamp = Date.now()
+    const newNotification: Notification = { 
+      id, 
+      timestamp,
+      ...notification 
+    }
     set(state => ({
       notifications: [...state.notifications, newNotification]
     }))
@@ -110,4 +108,27 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   })),
   
   clearNotifications: () => set({ notifications: [] })
+}))
+
+interface RoutingState {
+  navigate: (path: string) => void
+  currentPath: string
+}
+
+// 라우팅 상태 관리
+export const useRoutingStore = create<RoutingState>((set) => ({
+  currentPath: typeof window !== 'undefined' ? window.location.pathname : '/',
+  
+  navigate: (path) => {
+    if (typeof window !== 'undefined') {
+      // 브라우저 히스토리에 추가
+      window.history.pushState({}, '', path)
+      
+      // 현재 경로 업데이트
+      set({ currentPath: path })
+      
+      // popstate 이벤트 발생시켜 라우터가 반응하도록 함
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    }
+  }
 }))

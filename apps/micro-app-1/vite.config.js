@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 import path from 'path'
 
 export default defineConfig(({ command }) => {
   const isDev = command === 'serve'
   
   return {
+    plugins: [react()],
     server: {
       port: 3001,
       cors: true,
@@ -25,7 +27,8 @@ export default defineConfig(({ command }) => {
       jsxFragment: 'React.Fragment'
     },
     define: {
-      'process.env.NODE_ENV': '"production"'
+      'process.env.NODE_ENV': isDev ? '"development"' : '"production"',
+      'import.meta.env.DEV': isDev
     },
     build: {
       lib: {
@@ -35,7 +38,7 @@ export default defineConfig(({ command }) => {
         formats: ['es']
       },
       rollupOptions: {
-        external: [],
+        external: ['react', 'react-dom', 'react-dom/client'],
         output: {
           entryFileNames: 'micro-app-1-v1.js',
           globals: {

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Micro App 2 - 개발 서버</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+    }
+    #root {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .dev-header {
+      background: linear-gradient(135deg, #2196F3, #1976D2);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div class="dev-header">
+      <h1>🚀 Micro App 2 개발 서버</h1>
+      <p>포트: 3002 | 개발 모드에서 실행 중</p>
+    </div>
+    <div id="micro-app-2"></div>
+  </div>
+
+  <script type="module">
+    // 개발 환경에서 글로벌 설정 모킹
+    window.MFA_CONFIG = {
+      ssrData: {
+        user: {
+          id: 1,
+          name: "개발자",
+          email: "dev@example.com",
+          role: "admin"
+        },
+        theme: 'light',
+        queries: {
+          '["settings"]': {
+            appName: "MFA 개발 환경",
+            version: "2.0.0-dev",
+            features: ["dev-mode"]
+          }
+        }
+      },
+      environment: 'development'
+    };
+
+    // 마이크로 앱 로드 및 마운트
+    import('./src/main.tsx').then(({ mount }) => {
+      const container = document.getElementById('micro-app-2');
+      if (container) {
+        mount(container);
+      }
+    }).catch(error => {
+      console.error('마이크로 앱 로드 실패:', error);
+      document.getElementById('micro-app-2').innerHTML = 
+        '<div style="color: red; padding: 20px;">앱 로드에 실패했습니다. 콘솔을 확인해주세요.</div>';
+    });
+  </script>
+</body>
+</html>
