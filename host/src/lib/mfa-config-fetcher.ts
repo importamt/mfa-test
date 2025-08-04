@@ -5,6 +5,7 @@ interface MFAConfig {
   importMap: ImportMap
   routingTable: RoutingTableEntry[]
   persistentApps: string[]
+  frameworkUrl?: string
 }
 
 // 배포 관리 시스템 API (나중에 실제 URL로 변경)
@@ -28,6 +29,7 @@ export async function fetchMFAConfig(): Promise<MFAConfig> {
 
     return {
       importMap: data.apps,
+      frameworkUrl: data.apps['@mfa/framework'] || '/shared/shared-v1.js',
       routingTable: [
         {
           pathnames: ['/'],

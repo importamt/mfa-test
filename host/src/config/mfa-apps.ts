@@ -13,6 +13,18 @@ export interface MFAAppConfig {
 }
 
 export const MFA_APPS: Record<string, MFAAppConfig> = {
+  '@mfa/framework': {
+    name: 'framework',
+    displayName: 'MFA Framework',
+    dev: {
+      port: 3004,
+      entry: '/src/main.tsx',
+      buildPath: '/dist/shared-v1.js'
+    },
+    prod: {
+      url: '/shared/shared-v1.js'
+    }
+  },
   '@mfa/header-app': {
     name: 'header-app',
     displayName: '헤더 앱',

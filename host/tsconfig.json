@@ -18,10 +18,15 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@mfa/framework/react": ["../shared/src/react"],
+      "@mfa/framework/react-dom": ["../shared/src/react-dom"],
+      "@mfa/framework/react-query": ["../shared/src/react-query"],
+      "@mfa/framework/zustand": ["../shared/src/zustand"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "../global.d.ts"],
   "exclude": ["node_modules"]
 }

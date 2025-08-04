@@ -1,38 +1,28 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  server: {
-    port: 3005,
-    cors: true,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    }
-  },
-  esbuild: {
-    jsx: 'transform',
-    jsxFactory: 'React.createElement',
-    jsxFragment: 'React.Fragment'
+  define: {
+    'process.env.NODE_ENV': '"production"',
+    'process.env': {},
+    'global': 'window'
   },
   build: {
     lib: {
-      entry: 'src/main.tsx',
-      name: 'MfaShared',
-      fileName: 'shared-v1',
+      entry: 'src/browser-bundle.tsx',
+      name: 'MfaFramework',
+      fileName: 'mfa-framework',
       formats: ['es']
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react-dom/client', '@tanstack/react-query', 'zustand'],
+      external: [],
       output: {
-        entryFileNames: 'shared-v1.js',
-        globals: {
-          'react': 'React',
-          'react-dom': 'ReactDOM',
-          'react-dom/client': 'ReactDOMClient',
-          '@tanstack/react-query': 'ReactQuery',
-          'zustand': 'Zustand'
-        }
+        format: 'es',
+        entryFileNames: 'mfa-framework.js',
+        // Named exports를 위한 설정
+        exports: 'named',
+        // 서브패스를 위한 설정
+        preserveModules: false,
+        inlineDynamicImports: true
       }
     }
   }

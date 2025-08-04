@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useRouting, enableHMR } from '@mfa/shared'
+import { React, useRouting, enableHMR } from '@mfa/framework'
+const { useState } = React
 
 function HeaderApp(): JSX.Element {
     const [user, setUser] = useState<string>('Admin')

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
 interface RoutingContextType {
   pathname: string
@@ -9,7 +9,7 @@ interface RoutingContextType {
 
 const RoutingContext = createContext<RoutingContextType | null>(null)
 
-export function RoutingProvider({ children }: { children: React.ReactNode }) {
+export function RoutingProvider({ children }: { children: ReactNode }) {
   const [pathname, setPathname] = useState(typeof window !== 'undefined' ? window.location.pathname : '/')
   const [params, setParams] = useState<Record<string, string>>({})
   const [query, setQuery] = useState<Record<string, string>>({})

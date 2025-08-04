@@ -1,5 +1,5 @@
 declare module '@mfa/shared' {
-  import React from 'react'
+  import { React } from '@mfa/framework'
   
   // Types
   export const THEMES: {

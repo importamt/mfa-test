@@ -1,5 +1,4 @@
-import React from 'react'
-import { enableHMR } from '@mfa/shared'
+import { React, enableHMR } from '@mfa/framework'
 
 interface Todo {
     id: number

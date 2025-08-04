@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { ComponentType } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 
 // MFA 앱 정보를 저장하는 타입
 interface MfaAppInfo {
   root: Root
-  Component: React.ComponentType
+  Component: ComponentType
 }
 
 // HMR을 위한 전역 저장소 타입 선언
@@ -36,7 +36,7 @@ if (typeof window !== 'undefined' && !window.__MFA_APPS__) {
  * export { mount, unmount }
  * ```
  */
-export function createMfaApp(appName: string, AppComponent: React.ComponentType) {
+export function createMfaApp(appName: string, AppComponent: ComponentType) {
   let root: Root | null = null
 
   return {
@@ -94,9 +94,9 @@ export function createMfaApp(appName: string, AppComponent: React.ComponentType)
 export function enableHMR(
   meta: ImportMeta, 
   appName: string, 
-  Component: React.ComponentType
+  Component: ComponentType
 ): void {
-  const hot = meta.hot
+  const hot = (meta as any).hot
   
   if (!hot) return
   

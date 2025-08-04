@@ -1,50 +1,20 @@
-import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 import path from 'path'
+import { createMicroAppConfig } from '../../vite.base.config.js'
 
-export default defineConfig(({ command }) => {
-  const isDev = command === 'serve'
-  
-  return {
-    server: {
-      port: 3002,
-      cors: true,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      }
-    },
-    resolve: {
-      alias: {
-        '@mfa/shared': path.resolve(__dirname, '../../shared/src/main.tsx')
-      }
-    },
-    esbuild: {
-      jsx: 'transform',
-      jsxFactory: 'React.createElement',
-      jsxFragment: 'React.Fragment'
-    },
-    define: {
-      'process.env.NODE_ENV': '"production"'
-    },
-    build: {
-      lib: {
-        entry: 'src/main.tsx',
-        name: 'MicroApp2',
-        fileName: 'micro-app-2-v1',
-        formats: ['es']
-      },
-      rollupOptions: {
-        external: [],
-        output: {
-          entryFileNames: 'micro-app-2-v1.js',
-          globals: {
-            'react': 'React',
-            'react-dom': 'ReactDOM',
-            'react-dom/client': 'ReactDOMClient'
-          }
-        }
-      }
+const APP_NAME = 'micro-app-2'
+const PORT = 3002
+
+export default createMicroAppConfig(APP_NAME, PORT, {
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@mfa/framework': path.resolve(__dirname, '../../shared/src/main.tsx')
     }
+  },
+  esbuild: {
+    jsx: 'transform',
+    jsxFactory: 'React.createElement',
+    jsxFragment: 'React.Fragment'
   }
 })

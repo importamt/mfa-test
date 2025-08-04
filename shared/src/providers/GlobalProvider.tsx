@@ -1,10 +1,10 @@
-import React, { ReactNode } from 'react'
-import { MfaQueryProvider } from './QueryProvider.js'
-import { useUserStore, useNotificationStore } from '../stores/globalStore.js'
-import type { SSRData } from '../types/index.js'
+import React, { ReactNode, ReactElement, useEffect } from 'react'
+import { MfaQueryProvider } from './QueryProvider'
+import { useUserStore, useNotificationStore } from '../stores/globalStore'
+import type { SSRData } from '../types/index'
 
 // 글로벌 알림 컴포넌트
-function NotificationCenter(): JSX.Element | null {
+function NotificationCenter(): ReactElement | null {
   const { notifications, removeNotification } = useNotificationStore()
 
   if (notifications.length === 0) return null
@@ -12,7 +12,7 @@ function NotificationCenter(): JSX.Element | null {
   return (
     <div style={{
       position: 'fixed',
-      top: '20px',
+      top: '20px', 
       right: '20px',
       zIndex: 10000,
       display: 'flex',
@@ -55,11 +55,11 @@ interface MfaGlobalProviderProps {
 }
 
 // 메인 Global Provider
-export function MfaGlobalProvider({ children, ssrData = {} }: MfaGlobalProviderProps): JSX.Element {
+export function MfaGlobalProvider({ children, ssrData = {} }: MfaGlobalProviderProps): ReactElement {
   const { initializeFromSSR } = useUserStore()
 
   // SSR 데이터로 초기화
-  React.useEffect(() => {
+  useEffect(() => {
     if (ssrData.user || ssrData.theme || ssrData.language) {
       initializeFromSSR(ssrData)
     }

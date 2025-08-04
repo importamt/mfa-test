@@ -12,19 +12,7 @@ const nextConfig = {
   reactStrictMode: true,
   // 실험적 기능들
   experimental: {
-    // Turbopack 활성화 (개발 모드)
-    turbo: {
-      rules: {
-        '*.ts': {
-          loaders: ['ts-loader'],
-          as: '*.js',
-        },
-        '*.tsx': {
-          loaders: ['ts-loader'],
-          as: '*.js',
-        },
-      },
-    },
+    // Turbopack 비활성화
   },
   // 정적 파일 서빙 최적화
   compress: true,

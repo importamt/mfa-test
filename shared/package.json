@@ -1,23 +1,55 @@
 {
-  "name": "@mfa/shared",
+  "name": "@mfa/framework",
   "version": "1.0.0",
   "type": "module",
-  "main": "dist/shared-v1.js",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./react": {
+      "types": "./src/react.ts",
+      "import": "./src/react.ts",
+      "require": "./src/react.ts",
+      "default": "./src/react.ts"
+    },
+    "./react-dom": {
+      "types": "./src/react-dom.ts",
+      "import": "./src/react-dom.ts",
+      "require": "./src/react-dom.ts",
+      "default": "./src/react-dom.ts"
+    },
+    "./react-query": {
+      "types": "./src/react-query.ts",
+      "import": "./src/react-query.ts",
+      "require": "./src/react-query.ts",
+      "default": "./src/react-query.ts"
+    },
+    "./zustand": {
+      "types": "./src/zustand.ts",
+      "import": "./src/zustand.ts",
+      "require": "./src/zustand.ts",
+      "default": "./src/zustand.ts"
+    }
+  },
   "scripts": {
-    "dev": "vite",
+    "dev": "vite build --watch",
     "build": "vite build",
-    "build:prod": "vite build --config vite.config.prod.js",
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "@tanstack/react-query": "^5.0.0",
     "zustand": "^4.4.0"
   },
   "devDependencies": {
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "typescript": "^5.0.0",
     "vite": "^5.0.0"
   }

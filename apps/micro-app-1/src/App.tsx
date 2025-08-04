@@ -1,5 +1,5 @@
-import React from 'react'
-import { useUserStore, useNotificationStore, enableHMR } from '@mfa/shared'
+import { React } from '@mfa/framework'
+import { useUserStore, useNotificationStore, enableHMR } from '@mfa/framework'
 
 // React 컴포넌트만 export (HMR 지원)
 function MicroApp1(): JSX.Element {
@@ -87,7 +87,7 @@ function MicroApp1(): JSX.Element {
                         cursor: 'pointer'
                     }}
                 >
-                    테마 변경222
+                    테마 변경22
                 </button>
             </div>
             

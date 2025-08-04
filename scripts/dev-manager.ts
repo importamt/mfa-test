@@ -68,11 +68,20 @@ function parseArgs(): ParsedArgs {
 async function selectApps(lastSelected: string[] = []): Promise<string[]> {
   console.log('\n🚀 MFA 개발 서버 관리자\n')
   
-  const choices = MICRO_APPS.map(app => ({
-    name: `${app.displayName} - ${app.name} (포트: ${app.devPort})`,
-    value: app.name,
-    checked: lastSelected.includes(app.name)
-  }))
+  // 마이크로 앱 목록 생성
+  const choices = [
+    ...MICRO_APPS.map(app => ({
+      name: `${app.displayName} - ${app.name} (포트: ${app.devPort})`,
+      value: app.name,
+      checked: lastSelected.includes(app.name)
+    })),
+    // Framework를 마지막 선택지로 추가
+    {
+      name: `🔧 MFA Framework - framework (포트: 3004)`,
+      value: 'framework',
+      checked: lastSelected.includes('framework')
+    }
+  ]
 
   const { selectedApps } = await inquirer.prompt([
     {
@@ -98,6 +107,16 @@ function startDevServers(selectedApps: string[]): void {
   
   const processes: ProcessInfo[] = []
   
+  // Framework 서버 시작 (선택된 경우)
+  if (selectedApps.includes('framework')) {
+    console.log('🔧 Framework 서버 시작 중... (포트: 3004)')
+    const frameworkProcess = spawn('pnpm', ['--filter', '@mfa/framework', 'dev'], {
+      stdio: 'inherit',
+      shell: true
+    })
+    processes.push({ name: 'framework', process: frameworkProcess })
+  }
+
   // Host 서버 시작
   console.log('🏠 Host 서버 시작 중... (포트: 3000)')
   const hostProcess = spawn('pnpm', ['--filter', 'host', 'dev'], {
@@ -138,10 +157,15 @@ function startDevServers(selectedApps: string[]): void {
   console.log('\n✅ 개발 서버들이 시작되었습니다!')
   console.log('📋 실행 중인 서버들:')
   console.log('   🏠 Host: http://localhost:3000')
+  
   selectedApps.forEach(appName => {
-    const app = MICRO_APPS.find(a => a.name === appName)
-    if (app) {
-      console.log(`   📱 ${app.displayName}: http://localhost:${app.devPort}`)
+    if (appName === 'framework') {
+      console.log('   🔧 Framework: http://localhost:3004')
+    } else {
+      const app = MICRO_APPS.find(a => a.name === appName)
+      if (app) {
+        console.log(`   📱 ${app.displayName}: http://localhost:${app.devPort}`)
+      }
     }
   })
   console.log('\n⚠️  Ctrl+C로 모든 서버를 종료할 수 있습니다.\n')

@@ -1,5 +1,5 @@
-import React from 'react'
-import { enableHMR } from '@mfa/shared'
+import { React } from '@mfa/framework'
+import { enableHMR } from '@mfa/framework'
 
 interface Position {
     x: number

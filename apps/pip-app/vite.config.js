@@ -16,7 +16,7 @@ export default defineConfig(({ command }) => {
     },
     resolve: {
       alias: isDev ? {
-        '@mfa/shared': path.resolve(__dirname, '../../shared/src/main.tsx')
+        '@mfa/framework': path.resolve(__dirname, '../../shared/src/main.tsx')
       } : {}
     },
     esbuild: {
@@ -35,7 +35,7 @@ export default defineConfig(({ command }) => {
         formats: ['es']
       },
       rollupOptions: {
-        external: [],
+        external: ['@mfa/framework', 'react/jsx-runtime'],
         output: {
           entryFileNames: 'pip-v1.js',
           globals: {

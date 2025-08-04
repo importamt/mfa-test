@@ -4,10 +4,10 @@
     "baseUrl": ".",
     "outDir": "./dist",
     "paths": {
-      "@mfa/shared": ["../../shared/src/main.tsx"],
-      "@mfa/shared/*": ["../../shared/src/*"]
+      "@mfa/framework": ["../../shared/src/main.tsx"],
+      "@mfa/framework/*": ["../../shared/src/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../../global.d.ts"],
   "exclude": ["dist", "node_modules"]
 }

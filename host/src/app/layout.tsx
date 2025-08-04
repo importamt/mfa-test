@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import MFAProvider from '@/components/MFAProvider'
-import { fetchMFAConfig } from '@/lib/mfa-config-fetcher'
+import SimpleMFAProvider from '@/components/SimpleMFAProvider'
+import type { ReactNode } from '@mfa/framework'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -33,48 +33,38 @@ export const metadata: Metadata = {
   }
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }) {
-  // 서버 사이드에서 MFA 설정 가져오기
-  const mfaConfig = await fetchMFAConfig()
-
   return (
     <html lang="ko">
       <head>
-        {/* Import Map을 서버에서 렌더링 */}
+        {/* Import Map 설정 */}
         <script
           type="importmap"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
-              imports: mfaConfig.importMap
+              imports: {
+                '@mfa/framework': '/shared/mfa-framework.js',
+                '@mfa/framework/react': '/shared/mfa-framework.js',
+                '@mfa/framework/react-dom': '/shared/mfa-framework.js',
+                '@mfa/framework/react-query': '/shared/mfa-framework.js',
+                '@mfa/framework/zustand': '/shared/mfa-framework.js',
+                '@mfa/micro-app-1': '/apps/micro-app-1-v1.js',
+                '@mfa/micro-app-2': '/apps/micro-app-2-v1.js',
+                '@mfa/header-app': '/apps/header-v1.js',
+                '@mfa/pip-app': '/apps/pip-v1.js'
+              }
             }, null, 2)
-          }}
-        />
-        {/* MFA 설정을 window 객체에 주입 */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.MFA_CONFIG = {
-                importMap: ${JSON.stringify(mfaConfig.importMap)},
-                routingTable: ${JSON.stringify(mfaConfig.routingTable)},
-                persistentApps: ${JSON.stringify(mfaConfig.persistentApps)},
-                environment: '${process.env.NODE_ENV}',
-                version: '1.0.0',
-                currentRoute: '/',
-                ssrData: {}
-              };
-              console.log('📋 MFA_CONFIG loaded:', window.MFA_CONFIG);
-            `
           }}
         />
       </head>
       <body className={`${inter.className} min-h-screen bg-gray-50`}>
-        <MFAProvider>
+        <SimpleMFAProvider>
           {children}
-        </MFAProvider>
+        </SimpleMFAProvider>
       </body>
     </html>
   )

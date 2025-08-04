@@ -120,12 +120,4 @@ export interface MFAMetrics {
   lastUpdated: number
 }
 
-// 글로벌 윈도우 인터페이스 확장
-declare global {
-  interface Window {
-    MFA_CONFIG: MFAConfig
-    MFA_METRICS: MFAMetrics
-    __NEXT_MFA_HYBRID__: boolean
-    __MFA_SYSTEM__: any
-  }
-}
+// 글로벌 윈도우 인터페이스 확장 제거 - global.d.ts에서 처리

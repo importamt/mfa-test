@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import { React, useEffect, useRef, useState } from '@mfa/framework'
 
 interface MFADynamicLoaderProps {
   appId: string
@@ -52,8 +52,8 @@ export default function MFADynamicLoader({ appId, moduleUrl, containerId }: MFAD
                 console.log('🔥 ${appId} React 컴포넌트 직접 렌더링 (HMR 모드)');
                 
                 // React와 ReactDOM을 동적으로 가져오기
-                const React = window.React || (await import('react')).default;
-                const ReactDOM = window.ReactDOM || (await import('react-dom/client'));
+                const React = window.React || (await import('@mfa/framework')).React;
+                const ReactDOM = window.ReactDOM || (await import('@mfa/framework')).ReactDOM;
                 
                 // 컴포넌트 렌더링
                 const root = ReactDOM.createRoot(container);

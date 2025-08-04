@@ -45,6 +45,14 @@ This is a micro-frontend architecture (MFA) built with React and Vite, using PNP
 - Non-development apps use production build URLs
 - Configuration in `window.MFA_CONFIG` determines which apps are in development mode
 
+## Important Rules
+
+### No Hardcoding (하드코딩 금지)
+**절대로 URL, 포트 번호, 파일 경로 등을 하드코딩하지 마세요.**
+- 모든 설정은 중앙 설정 파일(`mfa-apps.ts`, `mfa-apps.config.ts`)을 사용해야 합니다
+- 개발/프로덕션 환경에 따른 동적 설정을 활용하세요
+- 하드코딩된 값을 발견하면 즉시 설정 기반으로 리팩토링하세요
+
 ## Common Development Commands
 
 ### Start Development Environment

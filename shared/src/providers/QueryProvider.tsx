@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react'
+import React, { ReactNode, ReactElement, useMemo } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // 글로벌 QueryClient 인스턴스
@@ -45,8 +45,8 @@ interface MfaQueryProviderProps {
 }
 
 // Provider 컴포넌트
-export function MfaQueryProvider({ children, ssrQueries }: MfaQueryProviderProps): JSX.Element {
-  const queryClient = React.useMemo(() => {
+export function MfaQueryProvider({ children, ssrQueries }: MfaQueryProviderProps): ReactElement {
+  const queryClient = useMemo(() => {
     return initializeQueryClient(ssrQueries)
   }, [ssrQueries])
 

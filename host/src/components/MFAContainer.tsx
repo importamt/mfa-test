@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { React, useEffect, useRef } from '@mfa/framework';
 import { initializeMFASystem, HybridMFASystem } from "@/lib/mfa-system";
 
 export default function MFAContainer() {
@@ -14,7 +14,7 @@ export default function MFAContainer() {
     // 한 번만 초기화
     if (!isInitialized.current) {
       console.log("🚀 MFA Container 초기화", {
-        importMap: window.MFA_CONFIG.importMap,
+        importMap: (window.MFA_CONFIG as any).importMap,
         persistentApps: window.MFA_CONFIG.persistentApps,
         routingTable: window.MFA_CONFIG.routingTable
       });

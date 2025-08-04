@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
   const devConfig = await getDevConfig()
   
   for (const [appId, config] of Object.entries(MFA_APPS)) {
+    
     if (isDev) {
       // 개발 환경에서는 선택된 앱만 개발 서버 체크
       const isSelectedForDev = devConfig.lastSelected.includes(config.name)

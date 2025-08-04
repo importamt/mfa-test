@@ -10,7 +10,7 @@ export class HybridMFASystem {
   private preloadCache: Map<string, Promise<MicroAppModule>> = new Map()
 
   constructor() {
-    this.config = window.MFA_CONFIG
+    this.config = window.MFA_CONFIG as unknown as MFAConfig
     this.metrics = {
       loadTimes: {},
       errorCounts: {},
