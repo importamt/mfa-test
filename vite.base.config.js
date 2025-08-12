@@ -1,5 +1,4 @@
 import { defineConfig } from 'vite'
-import { externalGlobals } from './vite-plugin-external-globals.js'
 
 // 모든 마이크로앱이 공유하는 기본 Vite 설정
 export const baseExternals = [
@@ -11,16 +10,6 @@ export const baseExternals = [
   'zustand',
   '@mfa/framework'
 ];
-
-export const baseGlobals = {
-  'react': 'window.React',
-  'react-dom': 'window.ReactDOM',
-  'react-dom/client': 'window.ReactDOMClient',
-  'react/jsx-runtime': 'window.React',
-  '@tanstack/react-query': 'window.MfaFramework',
-  'zustand': 'window.MfaFramework',
-  '@mfa/framework': 'window.MfaFramework'
-};
 
 // 개발 서버 기본 설정
 export const baseServerConfig = {
@@ -59,12 +48,15 @@ export function createMicroAppConfig(appName, port, customConfig = {}) {
           external: baseExternals,
           output: {
             format: 'es',
-            globals: baseGlobals
-          },
-          plugins: [
-            externalGlobals(baseGlobals)
-          ]
-        }
+            // Import Map을 사용하므로 globals 설정 제거
+            // 외부 모듈은 import 문으로 유지됨
+            // CSS를 JS에 인라인으로 포함
+            inlineDynamicImports: true,
+            assetFileNames: '[name][extname]'
+          }
+        },
+        // CSS를 JS 번들에 인라인으로 포함
+        cssCodeSplit: false
       }
     }
   })

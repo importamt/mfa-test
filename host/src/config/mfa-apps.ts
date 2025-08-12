@@ -60,6 +60,54 @@ export const MFA_APPS: Record<string, MFAAppConfig> = {
     prod: {
       url: '/apps/micro-app-2-v1.js'
     }
+  },
+  '@mfa/onboarding': {
+    name: 'onboarding',
+    displayName: '온보딩',
+    dev: {
+      port: 3005,
+      entry: '/src/main.tsx',
+      buildPath: '/dist/onboarding-v1.js'
+    },
+    prod: {
+      url: '/apps/onboarding-v1.js'
+    }
+  },
+  '@mfa/login': {
+    name: 'login',
+    displayName: '로그인',
+    dev: {
+      port: 3006,
+      entry: '/src/main.tsx',
+      buildPath: '/dist/login-v1.js'
+    },
+    prod: {
+      url: '/apps/login-v1.js'
+    }
+  },
+  '@mfa/main': {
+    name: 'main',
+    displayName: '메인',
+    dev: {
+      port: 3007,
+      entry: '/src/main.tsx',
+      buildPath: '/dist/main-v1.js'
+    },
+    prod: {
+      url: '/apps/main-v1.js'
+    }
+  },
+  '@mfa/player': {
+    name: 'player',
+    displayName: '플레이어',
+    dev: {
+      port: 3008,
+      entry: '/src/main.tsx',
+      buildPath: '/dist/player-v1.js'
+    },
+    prod: {
+      url: '/apps/player-v1.js'
+    }
   }
 }
 
@@ -124,8 +172,9 @@ export async function getAppUrl(
 
 // 라우트별 앱 매핑도 중앙화
 export const ROUTE_APPS: Record<string, string[]> = {
-  '/': ['@mfa/micro-app-1'],
-  '/main': ['@mfa/micro-app-1'],
+  '/': ['@mfa/onboarding'],
+  '/login': ['@mfa/login'],
+  '/main': ['@mfa/main'],
   '/dashboard': ['@mfa/micro-app-2'],
   '/profile': ['@mfa/micro-app-1', '@mfa/micro-app-2'],
 }

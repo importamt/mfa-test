@@ -1,60 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { MFA_APPS, getAppUrl } from '@/config/mfa-apps'
-import fs from 'fs/promises'
-import path from 'path'
+import { fetchMfaSystemConfig } from '@/lib/mfa-api-mock'
+import { readDevConfig, resolveAppUrl } from '@/lib/mfa-dev-config'
 
-// 개발 설정 읽기
-async function getDevConfig() {
-  try {
-    // Next.js는 host 디렉토리에서 실행되므로 상위 디렉토리로 이동
-    const configPath = path.join(process.cwd(), '..', '.mfa-dev-config.json')
-    console.log('📄 설정 파일 경로:', configPath)
-    const data = await fs.readFile(configPath, 'utf8')
-    const config = JSON.parse(data)
-    console.log('📋 개발 설정:', config)
-    return config
-  } catch (error) {
-    console.error('❌ 설정 파일 읽기 실패:', error)
-    return { lastSelected: [] }
-  }
-}
-
-// MFA 설정 API - 서버에서 HEAD 체크하고 URL 결정
+/**
+ * MFA 설정 API 엔드포인트
+ * Mock API를 통해 시스템 설정을 가져오고
+ * 개발 모드에서는 .mfa-dev-config.json 기반으로 URL 결정
+ */
 export async function GET(request: NextRequest) {
   const isDev = process.env.NODE_ENV === 'development'
   
-  // 서버에서 앱 URL들을 미리 결정
-  const appUrls: Record<string, string> = {}
-  const devConfig = await getDevConfig()
+  // Mock API에서 시스템 설정 가져오기
+  const systemConfig = await fetchMfaSystemConfig()
+  const devConfig = await readDevConfig()
   
-  for (const [appId, config] of Object.entries(MFA_APPS)) {
-    
-    if (isDev) {
-      // 개발 환경에서는 선택된 앱만 개발 서버 체크
-      const isSelectedForDev = devConfig.lastSelected.includes(config.name)
-      console.log(`🔍 ${appId} (${config.name}): 선택됨=${isSelectedForDev}`)
-      
-      if (isSelectedForDev) {
-        // 선택된 앱은 개발 서버 체크 후 URL 결정
-        const url = await getAppUrl(appId, { 
-          useSourceFile: true,
-          checkDevServer: true
-        })
-        appUrls[appId] = url
-      } else {
-        // 선택되지 않은 앱은 프로덕션 빌드 사용
-        appUrls[appId] = config.prod.url
-        console.log(`📦 ${appId}: 프로덕션 빌드 사용 - ${config.prod.url}`)
-      }
-    } else {
-      // 프로덕션은 항상 빌드된 파일 사용
-      appUrls[appId] = config.prod.url
-    }
+  // 각 앱의 URL 결정
+  const appUrls: Record<string, string> = {}
+  const importMap: Record<string, string> = {}
+  
+  // Framework URL 결정
+  if (isDev && devConfig.framework?.port) {
+    const frameworkUrl = `http://localhost:${devConfig.framework.port}/src/main.tsx`
+    importMap[systemConfig.framework.id] = frameworkUrl
+  } else {
+    importMap[systemConfig.framework.id] = systemConfig.framework.productionUrl
   }
-
+  
+  // 각 앱 URL 결정
+  for (const app of systemConfig.apps) {
+    const url = await resolveAppUrl(
+      app.id,
+      app.name,
+      app.productionUrl,
+      isDev
+    )
+    appUrls[app.id] = url
+  }
+  
+  // 라우팅 정보 생성 (page 타입 앱들만)
+  const routes = systemConfig.apps
+    .filter(app => app.type === 'page' && app.route)
+    .reduce((acc, app) => {
+      acc[app.route!] = app.id
+      return acc
+    }, {} as Record<string, string>)
+  
+  // persistent 앱들 (항상 마운트)
+  const persistentApps = systemConfig.apps
+    .filter(app => app.type === 'persistent')
+    .map(app => app.id)
+  
   return NextResponse.json({
     apps: appUrls,
+    importMap,
+    routes,
+    persistentApps,
     environment: isDev ? 'development' : 'production',
-    developmentApps: isDev ? devConfig.lastSelected : []
+    developmentApps: isDev ? devConfig.lastSelected : [],
+    systemConfig
   })
 }

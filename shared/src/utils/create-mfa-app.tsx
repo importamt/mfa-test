@@ -42,12 +42,23 @@ export function createMfaApp(appName: string, AppComponent: ComponentType) {
   return {
     /**
      * 컴포넌트를 DOM에 마운트
-     * @param container - 마운트할 DOM 요소
+     * @param containerOrId - 마운트할 DOM 요소 또는 요소 ID
      */
-    mount(container: HTMLElement) {
+    mount(containerOrId: HTMLElement | string) {
       if (root) {
         console.warn(`${appName}는 이미 마운트되어 있습니다.`)
         return
+      }
+      
+      // 컨테이너 찾기
+      let container: HTMLElement | null
+      if (typeof containerOrId === 'string') {
+        container = document.getElementById(containerOrId)
+        if (!container) {
+          throw new Error(`Container with id '${containerOrId}' not found`)
+        }
+      } else {
+        container = containerOrId
       }
       
       root = createRoot(container)

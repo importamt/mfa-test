@@ -1,6 +1,26 @@
 {
   "lastSelected": [
-    "micro-app-1"
+    "onboarding"
   ],
-  "lastRun": "2025-08-04T13:09:58.759Z"
+  "lastRun": "2025-08-12T10:02:33.419Z",
+  "apps": {
+    "onboarding": {
+      "port": 4001
+    },
+    "login": {
+      "port": 4002
+    },
+    "main": {
+      "port": 4003
+    },
+    "header": {
+      "port": 4004
+    },
+    "player": {
+      "port": 4005
+    }
+  },
+  "framework": {
+    "port": 5173
+  }
 }

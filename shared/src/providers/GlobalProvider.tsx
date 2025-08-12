@@ -12,7 +12,7 @@ function NotificationCenter(): ReactElement | null {
   return (
     <div style={{
       position: 'fixed',
-      top: '20px', 
+      top: '20px',
       right: '20px',
       zIndex: 10000,
       display: 'flex',
@@ -20,7 +20,7 @@ function NotificationCenter(): ReactElement | null {
       gap: '10px'
     }}>
       {notifications.map(notification => (
-        <div
+        <div 
           key={notification.id}
           style={{
             background: notification.type === 'error' ? '#ff6b6b' : 

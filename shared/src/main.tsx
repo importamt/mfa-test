@@ -35,8 +35,40 @@ if (typeof window !== 'undefined') {
   
 }
 
-// React 전체를 export
+// React 전체를 export (hooks 포함)
 export { React, ReactDOM, createRoot }
+
+// jsx-runtime export (Vite 빌드에서 필요)
+import { jsx, jsxs, Fragment } from 'react/jsx-runtime'
+export { jsx, jsxs, Fragment }
+
+// Icons removed - each app should import lucide-react directly
+
+// MFA 앱 생성 및 HMR 지원
+export { createMfaApp, enableHMR } from './utils/create-mfa-app'
+
+// React hooks를 명시적으로 export
+export const { 
+  useState,
+  useEffect,
+  useContext,
+  useReducer,
+  useCallback,
+  useMemo,
+  useRef,
+  useImperativeHandle,
+  useLayoutEffect,
+  useDebugValue,
+  useId,
+  useTransition,
+  useDeferredValue,
+  useSyncExternalStore,
+  useInsertionEffect
+} = React
+
+// React 타입도 export
+export type { ReactNode, ReactElement, FC, PropsWithChildren } from 'react'
+
 export * from '@tanstack/react-query'
 export { create }
 

@@ -12,146 +12,204 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 정말 재미있거나 흥미로운 순간에만 자연스럽게 유쾌함 표현하기, 하지만 개인적으로 재밌는걸 선호
 - 이모지나 "ㅋㅋ" 남발하지 않고, 영혼을 담은 진짜 소통하기
 - 형식적이고 가식적인 밝음보다는 차분하고 유용한 대화 지향
-- 비판적인 태도가 매우 중요함. 
-- 할루시네이션을 항상 경계하고 올바른 정보를 전달하지 못할 때는 잘 모르겠다고 답변할 수 있음. 
+- 비판적인 태도가 매우 중요함
+- 할루시네이션을 항상 경계하고 올바른 정보를 전달하지 못할 때는 잘 모르겠다고 답변할 수 있음
 - 개발자와 협업해서 함께 해결하려는 태도도 중요
 
-## TypeScript Configuration
+## Project Architecture (2025-08-12 현행화)
 
-This project is fully converted to TypeScript with strict typing enabled:
+### TypeScript 기반 Import Map MFA 시스템
 
-- **Type Safety**: All micro apps, shared library, and host application use TypeScript
-- **Shared Types**: Common interfaces and types are defined in `shared/src/types/index.ts`
-- **React Components**: All React components are properly typed with JSX.Element return types
-- **Import Maps**: MFA configuration and window interfaces are properly typed
+이 프로젝트는 **window 전역 객체 의존성을 제거**하고 **TypeScript로 완전히 재구성**된 MFA 시스템입니다.
 
-## Project Architecture
+#### 핵심 구조
+```typescript
+// TypeScript 모듈로 깔끔하게 정리
+host/src/lib/
+├── mfa-host.ts         # MicroFrontendHost 클래스 (싱글톤)
+├── mfa-api-mock.ts     # Mock API 함수들 (실제 API 시뮬레이션)
+└── mfa-dev-config.ts   # 개발 설정 관리 (.mfa-dev-config.json)
+```
 
-This is a micro-frontend architecture (MFA) built with React and Vite, using PNPM workspaces. The system consists of:
+#### 주요 컴포넌트
+- **Host Application** (`host/`): Next.js 15 App Router 기반
+- **Framework** (`framework/`): React + 공통 라이브러리 번들
+- **Remote Apps** (`apps/`): 독립 마이크로 앱들
+  - `onboarding`: 온보딩 화면 (TVING 프로모션)
+  - `login`: 로그인 화면 (소셜 로그인)
+  - `main`: 메인 대시보드
+  - `header`: 전역 헤더 (persistent)
+  - `player`: 미디어 플레이어 (persistent)
 
-### Core Components
-- **Host Application** (`host/`): Main orchestrator that manages the micro-frontend lifecycle
-- **Shared Library** (`shared/`): Common utilities, providers, and state management shared across all micro apps
-- **Micro Applications** (`apps/`): Individual feature applications that can be developed independently
+### TypeScript MFA Host 시스템
 
-### Key Architecture Patterns
-- **Dynamic Import Maps**: Host dynamically generates import maps to support both development (HMR) and production builds
-- **Global State Management**: Uses Zustand for state management with React Query for data fetching
-- **Provider Pattern**: Shared library provides global providers (MfaGlobalProvider, MfaQueryProvider) that wrap the entire application
-- **Mount/Unmount Lifecycle**: Each micro app implements `mount()` and `unmount()` functions for dynamic loading
+#### MicroFrontendHost 클래스
+```typescript
+// 싱글톤 패턴으로 안정적인 인스턴스 관리
+import { getMfaHost } from '@/lib/mfa-host'
 
-### Development vs Production Loading
-- Development apps use development server URLs with HMR support
-- Non-development apps use production build URLs
-- Configuration in `window.MFA_CONFIG` determines which apps are in development mode
+const host = getMfaHost()
+await host.initialize()          // Import Map 초기화
+await host.loadApp(appId)        // 앱 동적 로드
+await host.mountApp(appId, containerId)  // 앱 마운트
+host.unmountApp(appId)           // 앱 언마운트
+```
+
+#### Import Map 동적 주입
+- 더 이상 외부 JS 파일에 의존하지 않음
+- TypeScript 클래스가 직접 Import Map 생성 및 주입
+- 타입 안정성 보장
+
+### 스타일링 시스템
+
+#### Tailwind CSS 통합
+- **모든 앱에서 Tailwind CSS 사용**
+- **공통 설정**: `tailwind.config.base.js`
+- **TVING 색상 테마**:
+  ```js
+  tving: {
+    red: '#FF153C',
+    dark: '#000000',
+    gray: { 100-800 }
+  }
+  ```
+- **PostCSS**: `@tailwindcss/postcss` 플러그인 사용
+- **No JavaScript Events**: `onMouseEnter` 제거, `hover:` 클래스 사용
+
+### 철학: 일관성과 효율성
+
+#### 네이밍 일관성 (The Golden Rule)
+```
+폴더명 = package.json name = workspace name = API 설정 = 개발자 멘탈
+```
+
+#### Import Map의 가치
+100개의 Remote 앱이 있을 때:
+- **전통 방식**: 각 앱이 React 번들링 → 15MB (150KB × 100)
+- **Import Map 방식**: Framework 한 번만 로드 → 1.3MB (300KB + 10KB × 100)
+- **절감 효과**: 91% 용량 감소
+
+## Development Workflow
+
+### 개발 서버 시작
+```bash
+# CLI로 개발할 앱 선택
+pnpm dev
+
+# 자동으로 포트 기억 (.mfa-dev-config.json)
+{
+  "lastSelected": ["onboarding"],
+  "apps": {
+    "onboarding": { "port": 4001 }
+  }
+}
+```
+
+### 빌드 및 타입 체크
+```bash
+pnpm build        # 전체 빌드
+pnpm typecheck    # TypeScript 타입 체크
+```
+
+## File Structure (현행화)
+
+```
+mfa-test/
+├── host/                       # Next.js Host Application
+│   ├── src/
+│   │   ├── app/               # App Router pages
+│   │   │   ├── page.tsx       # 메인 네비게이션 (Tailwind)
+│   │   │   ├── onboarding/    
+│   │   │   ├── login/         
+│   │   │   └── main/          
+│   │   ├── components/
+│   │   │   └── MfaRemoteLoader.tsx  # TypeScript 기반 로더
+│   │   └── lib/
+│   │       ├── mfa-host.ts         # MFA Host 시스템 ✨
+│   │       ├── mfa-api-mock.ts     # Mock API
+│   │       └── mfa-dev-config.ts   # 개발 설정
+│   ├── tailwind.config.js    # root config 상속
+│   └── postcss.config.js     # @tailwindcss/postcss
+├── framework/                 # @mfa/framework
+│   └── src/main.jsx          
+├── apps/                      # Remote Applications (모두 Tailwind)
+│   ├── onboarding/           
+│   ├── login/                
+│   ├── main/                 
+│   ├── header/               
+│   └── player/               
+├── scripts/
+│   └── dev-cli.js            
+├── .mfa-dev-config.json      # 자동 생성
+├── tailwind.config.base.js   # 공통 Tailwind 설정 ✨
+└── postcss.config.js         # Root PostCSS 설정 ✨
+```
 
 ## Important Rules
 
+### No Window Global (전역 객체 사용 금지)
+- ❌ `window.MicroFrontendHost`
+- ✅ `import { getMfaHost } from '@/lib/mfa-host'`
+- TypeScript 모듈과 클래스로 깔끔한 구조 유지
+
 ### No Hardcoding (하드코딩 금지)
-**절대로 URL, 포트 번호, 파일 경로 등을 하드코딩하지 마세요.**
-- 모든 설정은 중앙 설정 파일(`mfa-apps.ts`, `mfa-apps.config.ts`)을 사용해야 합니다
-- 개발/프로덕션 환경에 따른 동적 설정을 활용하세요
-- 하드코딩된 값을 발견하면 즉시 설정 기반으로 리팩토링하세요
+- URL, 포트, 경로 등 하드코딩 금지
+- 모든 설정은 중앙 관리
+- 환경별 동적 설정 활용
 
-## Common Development Commands
+### Tailwind Only (스타일링 일관성)
+- 모든 스타일은 Tailwind CSS 클래스로
+- `onMouseEnter/onMouseLeave` 사용 금지
+- `hover:`, `focus:` 등 CSS 기반 상태 관리
 
-### Start Development Environment
-```bash
-# Start all micro apps and host simultaneously
-pnpm dev
+## Troubleshooting
 
-# Start only micro-app-2 with host and shared
-pnpm dev:micro2-only
+### "MicroFrontendHost not found" 오류 (해결됨)
+- ✅ TypeScript 모듈로 완전 재구성
+- ✅ `getMfaHost()` 싱글톤 패턴 사용
+- ✅ 타입 안정성 보장
 
-# Start micro-app-1 and header with host and shared  
-pnpm dev:micro1-header
-```
+### Import Map 로딩 실패
+1. 개발 서버 확인: `pnpm dev`
+2. 포트 설정 확인: `.mfa-dev-config.json`
+3. Host 초기화 확인: `await host.initialize()`
 
-### Build Commands
-```bash
-# Build all packages
-pnpm build
+### Tailwind CSS 적용 안 됨
+1. `postcss.config.js`: `@tailwindcss/postcss` 설정
+2. `src/index.css`: `@tailwind` directives
+3. `main.tsx`: CSS import 확인
 
-# TypeScript type checking across all packages
-pnpm typecheck
+## Recent Changes (2025-08-12)
 
-# Install dependencies for all workspaces
-pnpm install:all
-```
+### ✅ 완료된 작업
+1. **TypeScript 기반 MFA Host 시스템 구축**
+   - window 전역 객체 의존성 제거
+   - 싱글톤 패턴으로 안정적인 인스턴스 관리
+   - 타입 안정성 확보
 
-### Individual Package Commands
-```bash
-# Work with specific packages using filters
-pnpm --filter mfa-host dev
-pnpm --filter @mfa/shared build
-pnpm --filter @mfa/micro-app-1 dev
-```
+2. **Tailwind CSS 전면 적용**
+   - 모든 앱 Tailwind로 마이그레이션
+   - 공통 설정 파일로 일관성 확보
+   - hover 이벤트를 CSS로 전환
 
-## Package Structure
+3. **불필요한 파일 정리**
+   - 외부 JS 파일들 제거
+   - 사용하지 않는 컴포넌트 정리
+   - 코드베이스 간소화
 
-### Workspace Configuration
-- Uses PNPM workspaces defined in `pnpm-workspace.yaml`
-- Packages: `host`, `apps/*`, `shared`
-- Monorepo managed with `concurrently` for parallel development
+### 🚧 향후 계획
+- Production 빌드 최적화
+- CDN 배포 전략
+- Remote 앱 간 통신 시스템
+- 성능 모니터링 도구
 
-### Shared Library (`@mfa/shared`)
-- Exports global providers, stores, hooks, and utilities
-- Provides React Query setup and Zustand stores
-- Has both development and production build configurations
-- Entry point: `src/main.jsx`
+## Developer Notes
 
-### Host Application (`mfa-host`)
-- Runs on port 3000 in development
-- Implements `MicroFrontendHost` class for app orchestration
-- Manages routing and dynamic app loading
-- Entry point: `src/main.js`
+"TypeScript로 깔끔하게 정리하니 훨씬 안정적이고 유지보수하기 좋아졌다. 
+window 전역 객체에 의존하지 않고, 타입이 명확하니 개발 경험이 크게 개선됐다."
 
-### Micro Applications
-- Each app in `apps/` directory has its own package.json
-- Standard Vite + React setup
-- Must implement `mount()` and `unmount()` functions
-- Can use shared bridge for inter-app communication
+"Tailwind CSS로 통일하니 스타일 관리가 훨씬 편해졌다. 
+각 앱마다 다른 스타일 시스템을 쓰면 나중에 고생한다. 처음부터 통일하자."
 
-## Key Files to Understand
-
-- `host/src/main.js`: Core micro-frontend orchestration logic
-- `shared/src/main.jsx`: Shared library exports and mount/unmount functions  
-- `shared/src/providers/GlobalProvider.jsx`: Global state and context
-- `shared/src/stores/globalStore.js`: Zustand state management
-- `shared/src/hooks/useQuery.js`: React Query hooks and API layer
-
-## 진행중인 작업 (2025-01-30)
-
-### 동적 Import Map 서버 렌더링 구조 연구
-- **관심사**: Next.js 서버 렌더링 중 imports map, routing table을 받은 뒤 index.html에 포함시켜 동적으로 remotes를 구성하는 방법
-- **현재 시도 중인 접근법**:
-  1. `/api/mfa-config` API로 런타임에 Import Map 생성
-  2. `DynamicImportMap` 컴포넌트로 서버 렌더링 시점에 주입 시도
-  3. `middleware.ts`로 요청 경로 추적
-  4. `mfa-system.js`에서 동적 Import Map 활용 로직
-
-### 현재 구조와 과제들
-- **기본 아이디어**: 하이브리드 SSR + CSR로 첫 로드는 빠르게, 이후는 동적 라우팅
-- **아직 정리 필요한 부분들**:
-  - 실제 마이크로 앱들이 각각 개발 서버에서 돌아야 하는데 현재는 정적 파일로만 테스트
-  - Import Map 구조가 중첩/평면 구조 섞여서 일관성 필요
-  - 에러 핸들링과 폴백 시나리오 미비
-  - 성능 최적화는 아직 이론적 단계
-
-### 고민하고 있는 파일들
-```
-host/
-├── src/app/api/mfa-config/route.ts    # 동적 설정 API (진행중)
-├── src/components/DynamicImportMap.tsx # SSR Import Map 주입 (실험중)
-├── middleware.ts                       # 경로 추적 (기본 구현)
-└── public/
-    ├── mfa-bootstrap.js               # 부트스트랩 로직
-    ├── mfa-system.js                  # 메인 시스템 (계속 수정중)
-    └── apps/                          # 임시 정적 파일들
-```
-
-### 막혔던/해결한 것들
-- Next.js 15에서 `headers()`가 async로 바뀜 → `await headers()` 사용
-- Import Map 찾지 못하는 오류 → 객체 구조 파싱 로직 추가
-- 마이크로 앱 404 오류 → 일단 존재하는 `/apps/` 경로로 임시 해결
-- 서버 렌더링 시점 데이터 주입 → 아직 완전하지 않지만 기본 틀은 동작
+"Import Map의 진짜 힘은 공통 라이브러리를 한 번만 로드하는 것. 
+이걸 제대로 활용하면 대규모 MFA 시스템도 가볍게 만들 수 있다."
